@@ -1,0 +1,51 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error, r2_score
+
+np.random.seed(42)
+area = np.random.randint(600, 3500, 200)
+bhk = np.where(area < 1000, 2, np.where(area < 1800, 3, 4))
+age = np.random.randint(0, 20, 200)
+price = (area * 0.05) + (bhk * 2) - (age * 0.5) + np.random.normal(0, 5, 200)
+
+df = pd.DataFrame({
+    'Area_SqFt': area,
+    'BHK': bhk,
+    'Age_Years': age,
+    'Price_Lakhs': np.maximum(price, 15)
+})
+
+print("1. Loading dataset...")
+print(f"Dataset loaded with {df.shape[0]} rows and {df.shape[1]} columns.\n")
+
+X = df[['Area_SqFt', 'BHK', 'Age_Years']]
+y = df['Price_Lakhs']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+print("2. Training the Random Forest model...")
+model = RandomForestRegressor(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
+
+print("3. Evaluating model accuracy...")
+predictions = model.predict(X_test)
+mae = mean_absolute_error(y_test, predictions)
+r2 = r2_score(y_test, predictions)
+
+print(f"   -> Mean Absolute Error: ₹{mae:.2f} Lakhs")
+print(f"   -> R-squared Score: {r2:.2f}\n")
+
+print("4. Predicting a new house price...")
+sample_house = pd.DataFrame({
+    'Area_SqFt': [1450],
+    'BHK': [3],
+    'Age_Years': [4]
+})
+predicted_price = model.predict(sample_house)[0]
+
+print("   Property Details:")
+print("   - Area: 1450 SqFt")
+print("   - Bedrooms: 3 BHK")
+print("   - Age: 4 Years")
+print(f"   Estimated Price: ₹{predicted_price:.2f} Lakhs")
