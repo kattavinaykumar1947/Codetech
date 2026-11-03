@@ -1,0 +1,148 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "<h1>Movie Recommendation Engine</h1>\n",
+    "This notebook builds a Content-Based Movie Recommendation Engine from scratch. \n",
+    "Instead of just throwing math at you, I've set it up the way we build things in the real world: step-by-step, starting with a small dataset so you can see exactly how the algorithm thinks.\n",
+    "\n",
+    "We'll use TF-IDF (Term Frequency-Inverse Document Frequency) and Cosine Similarity to find movies that share similar themes and genres."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "from sklearn.feature_extraction.text import TfidfVectorizer\n",
+    "from sklearn.metrics.pairwise import cosine_similarity\n",
+    "\n",
+    "print('Libraries imported! We are good to go.')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data = {\n",
+    "    'Title': [\n",
+    "        '3 Idiots', 'Inception', 'Dangal', 'The Dark Knight', \n",
+    "        'Zindagi Na Milegi Dobara', 'Interstellar', 'Sholay', \n",
+    "        'Baahubali', 'The Avengers', 'Dil Chahta Hai'\n",
+    "    ],\n",
+    "    'Genre': [\n",
+    "        'Comedy Drama', 'Sci-Fi Action', 'Biography Sports Drama', 'Action Crime Drama', \n",
+    "        'Comedy Drama Road-trip', 'Sci-Fi Drama', 'Action Adventure Comedy', \n",
+    "        'Action Epic Fantasy', 'Action Sci-Fi Superhero', 'Comedy Drama Romance'\n",
+    "    ],\n",
+    "    'Description': [\n",
+    "        'Three engineering students struggle against the pressures of the education system.',\n",
+    "        'A thief who enters the dreams of others to steal their secrets.',\n",
+    "        'A former wrestler trains his daughters to win gold medals for India.',\n",
+    "        'Batman faces his ultimate challenge against the Joker in Gotham.',\n",
+    "        'Three friends go on a bachelor trip to Spain and discover themselves.',\n",
+    "        'Astronauts travel through a wormhole to find a new home for humanity.',\n",
+    "        'Two ex-convicts are hired by a retired policeman to capture a ruthless dacoit.',\n",
+    "        'A young man learns about his royal heritage and fights for his kingdom.',\n",
+    "        'Earths mightiest heroes must come together to stop Loki from subjugating the world.',\n",
+    "        'Three inseparable childhood friends are just out of college, navigating love and life.'\n",
+    "    ]\n",
+    "}\n",
+    "\n",
+    "df = pd.DataFrame(data)\n",
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df['Combined_Features'] = df['Genre'] + ' ' + df['Description']\n",
+    "\n",
+    "print(df[['Title', 'Combined_Features']].head())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "vectorizer = TfidfVectorizer(stop_words='english')\n",
+    "feature_matrix = vectorizer.fit_transform(df['Combined_Features'])\n",
+    "\n",
+    "similarity = cosine_similarity(feature_matrix)\n",
+    "\n",
+    "print('Similarity matrix calculated! Shape:', similarity.shape)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def get_recommendations(movie_title, num_recommendations=2):\n",
+    "    try:\n",
+    "        movie_index = df[df['Title'].str.lower() == movie_title.lower()].index[0]\n",
+    "    except IndexError:\n",
+    "        return f\"Sorry, '{movie_title}' is not in our database.\"\n",
+    "    \n",
+    "    similarity_scores = list(enumerate(similarity[movie_index]))\n",
+    "    \n",
+    "    sorted_scores = sorted(similarity_scores, key=lambda x: x[1], reverse=True)[1:num_recommendations+1]\n",
+    "    \n",
+    "    recommended_movies = [df.iloc[score[0]]['Title'] for score in sorted_scores]\n",
+    "    \n",
+    "    return recommended_movies\n",
+    "\n",
+    "print(\"Recommendation engine is ready.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(\"If you liked '3 Idiots', you might also like:\")\n",
+    "print(get_recommendations('3 Idiots'))\n",
+    "\n",
+    "print(\"\\nIf you liked 'Inception', you might also like:\")\n",
+    "print(get_recommendations('Inception'))\n",
+    "\n",
+    "print(\"\\nIf you liked 'Sholay', you might also like:\")\n",
+    "print(get_recommendations('Sholay'))"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.0"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
