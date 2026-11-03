@@ -1,0 +1,175 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "<h1>Resume Parser</h1>\n",
+    "This notebook demonstrates how to build a clean and effective Resume Parser.\n",
+    "We will extract key information like Email, Phone Number, and Skills from a candidate's resume text using Regular Expressions (Regex) and basic text processing."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import re\n",
+    "import pandas as pd\n",
+    "\n",
+    "print('Libraries imported successfully.')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Instead of loading an external PDF immediately, we will use a sample text block so you can run and test this code instantly without needing extra files."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "resume_text = \"\"\"\n",
+    "VIKRAM SHARMA\n",
+    "Bengaluru, Karnataka | Data Scientist\n",
+    "Email: vikram.sharma@email.com | Phone: +91-9876543210\n",
+    "\n",
+    "SUMMARY:\n",
+    "Data Scientist with 3 years of experience in building machine learning models.\n",
+    "\n",
+    "SKILLS:\n",
+    "Python, SQL, Machine Learning, Deep Learning, NLP, AWS, Docker, Pandas, TensorFlow\n",
+    "\n",
+    "EXPERIENCE:\n",
+    "Data Scientist at Analytics Corp (2021 - Present)\n",
+    "- Developed predictive models using Python.\n",
+    "- Deployed machine learning APIs using Docker and AWS.\n",
+    "\n",
+    "EDUCATION:\n",
+    "B.Tech in Information Technology, NIT, 2020\n",
+    "\"\"\"\n",
+    "print(\"Resume text loaded.\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Extracting the Email Address using Regex."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def extract_email(text):\n",
+    "    email_pattern = r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+'\n",
+    "    match = re.search(email_pattern, text)\n",
+    "    return match.group(0) if match else None\n",
+    "\n",
+    "email = extract_email(resume_text)\n",
+    "print(f\"Extracted Email: {email}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Extracting the Phone Number. The pattern handles standard 10-digit numbers, including the optional +91 Indian country code."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def extract_phone(text):\n",
+    "    phone_pattern = r'(\\+91-?|0)?\\d{10}'\n",
+    "    match = re.search(phone_pattern, text)\n",
+    "    return match.group(0) if match else None\n",
+    "\n",
+    "phone = extract_phone(resume_text)\n",
+    "print(f\"Extracted Phone: {phone}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Extracting Skills by matching the text against a predefined database of technical skills."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def extract_skills(text):\n",
+    "    skill_database = ['Python', 'Java', 'C++', 'Machine Learning', 'SQL', 'AWS', 'Docker', 'NLP', 'Pandas', 'TensorFlow', 'React']\n",
+    "    extracted_skills = []\n",
+    "    \n",
+    "    for skill in skill_database:\n",
+    "        if re.search(r'\\b' + re.escape(skill) + r'\\b', text, re.IGNORECASE):\n",
+    "            extracted_skills.append(skill)\n",
+    "            \n",
+    "    return extracted_skills\n",
+    "\n",
+    "skills = extract_skills(resume_text)\n",
+    "print(f\"Extracted Skills: {skills}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Structuring the extracted data into a clear table format."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "parsed_data = {\n",
+    "    'Email': [email],\n",
+    "    'Phone': [phone],\n",
+    "    'Skills': [', '.join(skills)]\n",
+    "}\n",
+    "\n",
+    "df = pd.DataFrame(parsed_data)\n",
+    "df"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.0"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
